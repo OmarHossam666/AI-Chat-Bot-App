@@ -1,4 +1,4 @@
-import 'package:ai_assistant/home_page.dart';
+import 'package:ai_assistant/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
