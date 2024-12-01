@@ -47,6 +47,15 @@ class MyApp extends StatelessWidget {
             borderRadius: BorderRadius.circular(20.0),
           ),
         ),
+        appBarTheme: AppBarTheme(
+          centerTitle: true,
+          titleTextStyle: GoogleFonts.poppins(
+            fontSize: 18,
+          ),
+          actionsIconTheme: const IconThemeData(
+            size: 35,
+          ),
+        ),
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -74,6 +83,15 @@ class MyApp extends StatelessWidget {
         cardTheme: CardTheme(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20.0),
+          ),
+        ),
+        appBarTheme: AppBarTheme(
+          centerTitle: true,
+          titleTextStyle: GoogleFonts.poppins(
+            fontSize: 18,
+          ),
+          actionsIconTheme: const IconThemeData(
+            size: 30,
           ),
         ),
       ),

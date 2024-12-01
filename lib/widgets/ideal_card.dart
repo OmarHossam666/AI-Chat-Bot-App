@@ -1,3 +1,4 @@
+import 'package:ai_assistant/pages/speak_to_ai_page.dart';
 import 'package:flutter/material.dart';
 
 class IdealCard extends StatelessWidget {
@@ -14,24 +15,34 @@ class IdealCard extends StatelessWidget {
       child: SizedBox(
         height: 165,
         child: Card.filled(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                CircleAvatar(
-                  radius: 25,
-                  backgroundColor: theme.colorScheme.onPrimary,
-                  child: Icon(icon),
-                ),
-                Text(
-                  text,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
+          clipBehavior: Clip.hardEdge,
+          child: InkWell(
+            onTap: () {
+              // Navigate To AI Page
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const SpeakToAiPage()));
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    radius: 25,
+                    backgroundColor: theme.colorScheme.onPrimary,
+                    child: Icon(icon),
                   ),
-                ),
-              ],
+                  Text(
+                    text,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
