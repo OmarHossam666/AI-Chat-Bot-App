@@ -1,9 +1,21 @@
 import 'package:ai_assistant/widgets/ideal_card.dart';
 import 'package:ai_assistant/widgets/premium_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  }
 
   @override
   Widget build(BuildContext context) {
