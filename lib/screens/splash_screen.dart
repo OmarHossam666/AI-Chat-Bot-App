@@ -19,7 +19,11 @@ class _SplashScreenState extends State<SplashScreen> {
         if (mounted) {
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => const HomePage()),
+            MaterialPageRoute(
+                builder: (context) => HomePage(
+                      onToggleTheme: () {},
+                      themeMode: ThemeMode.system,
+                    )),
           );
         }
       },
@@ -29,19 +33,15 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     final Size mediaQuery = MediaQuery.sizeOf(context);
-    final theme = Theme.of(context);
 
     return Scaffold(
       body: Center(
         child: Column(
           children: [
             const Spacer(),
-            Card(
-              color: theme.colorScheme.onPrimary,
-              child: Image.asset(
-                "assets/images/logo.png",
-                width: mediaQuery.width * 0.5,
-              ),
+            Image.asset(
+              "assets/images/logo.png",
+              width: mediaQuery.width * 0.5,
             ),
             const Spacer(),
             Lottie.asset(

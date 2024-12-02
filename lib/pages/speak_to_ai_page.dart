@@ -1,3 +1,4 @@
+import 'package:ai_assistant/pages/chat_with_ai_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -59,28 +60,26 @@ class SpeakToAiPage extends StatelessWidget {
               style: IconButton.styleFrom(
                 backgroundColor: theme.colorScheme.onSecondary,
               ),
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const ChatWithAiPage()),
+                );
+              },
               icon: const Icon(
                 Icons.keyboard,
                 size: 30,
               ),
             ),
-            Container(
-              decoration: BoxDecoration(shape: BoxShape.circle, boxShadow: [
-                BoxShadow(
-                  color: theme.colorScheme.onSecondary,
-                  spreadRadius: 20,
-                )
-              ]),
-              child: IconButton.filledTonal(
-                style: IconButton.styleFrom(
-                  backgroundColor: theme.colorScheme.onPrimary,
-                ),
-                onPressed: () {},
-                icon: const Icon(
-                  CupertinoIcons.mic,
-                  size: 60,
-                ),
+            IconButton.filledTonal(
+              style: IconButton.styleFrom(
+                backgroundColor: theme.colorScheme.onPrimary,
+              ),
+              onPressed: () {},
+              icon: const Icon(
+                CupertinoIcons.mic,
+                size: 60,
               ),
             ),
             IconButton.filledTonal(

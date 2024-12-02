@@ -1,4 +1,4 @@
-import 'package:ai_assistant/screens/splash_screen.dart';
+import 'package:ai_assistant/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
@@ -13,8 +13,22 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  ThemeMode _themeMode = ThemeMode.system;
+
+  void _toggleTheme() {
+    setState(() {
+      _themeMode =
+          _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,6 +65,7 @@ class MyApp extends StatelessWidget {
           centerTitle: true,
           titleTextStyle: GoogleFonts.poppins(
             fontSize: 18,
+            color: const Color(0xFF232323),
           ),
           actionsIconTheme: const IconThemeData(
             size: 35,
@@ -59,7 +74,7 @@ class MyApp extends StatelessWidget {
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF89D9F2),
+          seedColor: const Color(0xFF232323),
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
@@ -95,9 +110,12 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-      themeMode: ThemeMode.system,
+      themeMode: _themeMode,
       debugShowCheckedModeBanner: false,
-      home: const SplashScreen(),
+      home: HomePage(
+        onToggleTheme: _toggleTheme,
+        themeMode: _themeMode,
+      ),
     );
   }
 }

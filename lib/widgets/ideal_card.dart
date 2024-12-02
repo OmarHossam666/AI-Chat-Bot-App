@@ -20,9 +20,9 @@ class IdealCard extends StatelessWidget {
             onTap: () {
               // Navigate To AI Page
               Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const SpeakToAiPage()));
+                context,
+                MaterialPageRoute(builder: (context) => const SpeakToAiPage()),
+              );
             },
             child: Padding(
               padding: const EdgeInsets.all(16),

@@ -1,10 +1,18 @@
+import 'package:ai_assistant/pages/chat_with_ai_page.dart';
 import 'package:ai_assistant/widgets/ideal_card.dart';
 import 'package:ai_assistant/widgets/premium_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  const HomePage({
+    super.key,
+    required this.onToggleTheme,
+    required this.themeMode,
+  });
+
+  final VoidCallback onToggleTheme;
+  final ThemeMode themeMode;
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -23,6 +31,17 @@ class _HomePageState extends State<HomePage> {
     const int numberOfHistories = 5;
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("AI Chat Bot"),
+        actions: [
+          IconButton(
+            onPressed: widget.onToggleTheme,
+            icon: widget.themeMode == ThemeMode.light
+                ? const Icon(Icons.dark_mode)
+                : const Icon(Icons.light_mode),
+          ),
+        ],
+      ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(20),
@@ -60,7 +79,13 @@ class _HomePageState extends State<HomePage> {
                 numberOfHistories,
                 (index) {
                   return ListTile(
-                    onTap: () {},
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ChatWithAiPage()),
+                      );
+                    },
                     titleTextStyle: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
