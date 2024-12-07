@@ -17,23 +17,33 @@ class SpeakToAiPage extends StatefulWidget {
 class _SpeakToAiPageState extends State<SpeakToAiPage> {
   late SpeechToText _speechToText;
   late FlutterTts _flutterTts;
+
   String _recognizedText = "";
   String _responseText = "";
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _initializeVoiceFeatures();
+  }
+
+  /// Initializes Speech-to-Text and Text-to-Speech features.
+  Future<void> _initializeVoiceFeatures() async {
     _speechToText = SpeechToText();
     _flutterTts = FlutterTts();
-    _initSpeech();
-    _configureTts();
+
+    await Future.wait([_initSpeech(), _configureTts()]);
   }
 
+  /// Initializes the SpeechToText engine.
   Future<void> _initSpeech() async {
-    await _speechToText.initialize();
-    setState(() {});
+    if (!await _speechToText.initialize()) {
+      debugPrint("SpeechToText initialization failed.");
+    }
   }
 
+  /// Configures the FlutterTTS instance.
   Future<void> _configureTts() async {
     await _flutterTts.setLanguage("en-US");
     await _flutterTts.setPitch(1.0);
@@ -42,57 +52,83 @@ class _SpeakToAiPageState extends State<SpeakToAiPage> {
         .setVoice({"name": "en-us-x-sfg#female_1", "locale": "en-US"});
   }
 
+  /// Speaks out the response text.
   Future<void> _speakResponse(String text) async {
     if (text.isNotEmpty) {
+      await _flutterTts.stop(); // Stops any ongoing speech.
       await _flutterTts.speak(text);
     }
   }
 
+  /// Starts listening to the user's voice.
   Future<void> _startListening() async {
-    await _speechToText.listen(onResult: _onSpeechResult);
-    setState(() {});
-  }
-
-  Future<void> _stopListening() async {
-    await _speechToText.stop();
-    setState(() {});
-  }
-
-  void _onSpeechResult(SpeechRecognitionResult result) {
-    setState(() {
-      _recognizedText = result.recognizedWords;
-    });
-
-    if (_recognizedText.isNotEmpty) {
-      _sendToGemini(_recognizedText);
+    if (await _speechToText.hasPermission) {
+      await _speechToText.listen(onResult: _onSpeechResult);
+    } else {
+      await _initSpeech();
     }
   }
 
+  /// Stops listening to the user's voice.
+  Future<void> _stopListening() async {
+    if (_speechToText.isListening) {
+      await _speechToText.stop();
+    }
+  }
+
+  /// Handles speech recognition results.
+  void _onSpeechResult(SpeechRecognitionResult result) {
+    final recognizedWords = result.recognizedWords;
+
+    if (recognizedWords.isNotEmpty && result.finalResult) {
+      setState(() {
+        _recognizedText = recognizedWords;
+        _isLoading = true;
+      });
+      _sendToGemini(recognizedWords);
+    }
+  }
+
+  /// Sends the recognized voice command to the Gemini API.
   Future<void> _sendToGemini(String voiceCommand) async {
     try {
       final response =
           await Gemini.instance.prompt(parts: [Part.text(voiceCommand)]);
+      final output = response?.output?.replaceAll('*', '') ??
+          "Failed to generate a response.";
 
       setState(() {
-        _responseText = response?.output?.replaceAll('*', '') ??
-            "An error occurred while generating a response.";
+        _responseText = output;
       });
-
-      await _speakResponse(_responseText);
+      await _speakResponse(output);
     } catch (error) {
       setState(() {
         _responseText = "Error: ${error.toString()}";
       });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
+  }
+
+  /// Resets the recognized and response text.
+  void _resetText() {
+    setState(() {
+      _recognizedText = "";
+      _responseText = "";
+    });
+    _flutterTts.stop();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final Size mediaQuery = MediaQuery.sizeOf(context);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Speaking to AI Bot"),
+        title: const Text("Speak to Moon"),
         actions: [
           IconButton(
             onPressed: () {},
@@ -110,20 +146,29 @@ class _SpeakToAiPageState extends State<SpeakToAiPage> {
             padding: const EdgeInsets.only(bottom: 30),
             child: Lottie.asset("assets/lottie/speaking_to_ai_bot.json"),
           ),
-          // The Text That Generated From The User
-          Text.rich(
-            style: theme.textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-            textAlign: TextAlign.center,
-            TextSpan(
-              text: _responseText.isEmpty
-                  ? _recognizedText.isEmpty
-                      ? "Click on the mic button to generate a voice command."
-                      : _recognizedText
-                  : _responseText,
-            ),
-          ),
+          _isLoading
+              ?
+              // Loading Animation
+              Center(
+                  child: Lottie.asset(
+                    'assets/lottie/loading.json',
+                    width: mediaQuery.width * 0.25,
+                    height: mediaQuery.height * 0.25,
+                  ),
+                )
+              :
+              // The Text That Generated From The User
+              Text(
+                  _responseText.isEmpty
+                      ? _recognizedText.isEmpty
+                          ? "Click on the mic button to generate a voice command."
+                          : _recognizedText
+                      : _responseText,
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -154,13 +199,12 @@ class _SpeakToAiPageState extends State<SpeakToAiPage> {
                 backgroundColor: theme.colorScheme.primary,
               ),
               onPressed: () async {
-                if (await _speechToText.hasPermission &&
-                    _speechToText.isNotListening) {
+                if (_speechToText.isNotListening) {
                   await _startListening();
                 } else if (_speechToText.isListening) {
                   await _stopListening();
                 } else {
-                  _initSpeech();
+                  await _initSpeech();
                 }
               },
               icon: Icon(
@@ -175,9 +219,9 @@ class _SpeakToAiPageState extends State<SpeakToAiPage> {
               style: IconButton.styleFrom(
                 backgroundColor: theme.colorScheme.secondary,
               ),
-              onPressed: () {},
+              onPressed: _resetText,
               icon: Icon(
-                Icons.more_horiz,
+                Icons.delete,
                 size: 30,
                 color: theme.colorScheme.onSecondary,
               ),

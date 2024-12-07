@@ -1,11 +1,12 @@
-import 'package:ai_assistant/pages/speak_to_ai_page.dart';
 import 'package:flutter/material.dart';
 
 class IdealCard extends StatelessWidget {
-  const IdealCard({super.key, required this.text, required this.icon});
+  const IdealCard(
+      {super.key, required this.text, required this.icon, required this.onTap});
 
   final String text;
   final IconData icon;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -17,13 +18,7 @@ class IdealCard extends StatelessWidget {
         child: Card.filled(
           clipBehavior: Clip.hardEdge,
           child: InkWell(
-            onTap: () {
-              // Navigate To AI Page
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const SpeakToAiPage()),
-              );
-            },
+            onTap: onTap,
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Column(

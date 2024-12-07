@@ -71,7 +71,7 @@ class MediaMessage extends StatelessWidget {
                 icon: const Icon(Icons.share),
               ),
             ],
-          )
+          ),
         ],
       ),
     );

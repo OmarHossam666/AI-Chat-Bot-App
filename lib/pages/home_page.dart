@@ -1,4 +1,5 @@
 import 'package:ai_assistant/pages/chat_with_ai_page.dart';
+import 'package:ai_assistant/pages/speak_to_ai_page.dart';
 import 'package:ai_assistant/widgets/ideal_card.dart';
 import 'package:ai_assistant/widgets/premium_card.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +33,7 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("AI Chat Bot"),
+        title: const Text("MoonTalk"),
         actions: [
           IconButton(
             onPressed: widget.onToggleTheme,
@@ -50,16 +51,27 @@ class _HomePageState extends State<HomePage> {
             const PremiumCard(),
             const SizedBox(height: 10),
             // Row With 2 Cards
-            const Row(
+            Row(
               children: [
                 IdealCard(
-                  text: 'Generate ideas & write articles',
-                  icon: Icons.border_color,
+                  text: 'Engage in a conversation with Moon',
+                  icon: Icons.chat_outlined,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const ChatWithAiPage()),
+                  ),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 IdealCard(
-                  text: 'Generate pictures & arts',
-                  icon: Icons.image,
+                  text: 'Interact with Moon through conversation',
+                  icon: Icons.mic_outlined,
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const SpeakToAiPage(),
+                    ),
+                  ),
                 ),
               ],
             ),

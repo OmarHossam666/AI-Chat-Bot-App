@@ -1,11 +1,9 @@
-import 'package:ai_assistant/data/messages.dart';
 import 'package:ai_assistant/models/message.dart';
 import 'package:ai_assistant/widgets/media_message.dart';
 import 'package:ai_assistant/widgets/text_message.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:speech_to_text/speech_recognition_result.dart';
-import 'package:speech_to_text/speech_to_text.dart';
+import 'package:flutter_gemini/flutter_gemini.dart';
+import 'package:lottie/lottie.dart';
 
 class ChatWithAiPage extends StatefulWidget {
   const ChatWithAiPage({super.key});
@@ -15,48 +13,86 @@ class ChatWithAiPage extends StatefulWidget {
 }
 
 class _ChatWithAiPageState extends State<ChatWithAiPage> {
-  late SpeechToText _speechToText;
-  String _recognizedText = "";
+  final _textController = TextEditingController();
+  final List<Message> _chatMessages = [];
+  bool _isLoading = false;
 
   @override
-  void initState() {
-    super.initState();
-    _speechToText = SpeechToText();
-    _initSpeech();
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
   }
 
-  void _initSpeech() async {
-    await _speechToText.initialize();
-    setState(() {});
-  }
+  /// Sends a user message and fetches the AI's response.
+  Future<void> _sendMessage() async {
+    final userInput = _textController.text.trim();
+    if (userInput.isEmpty) return;
 
-  void _startListening() async {
-    await _speechToText.listen(onResult: _onSpeechResult);
-    setState(() {});
-  }
+    _addMessage(
+      Message(
+        type: MessageType.text,
+        sender: MessageSender.human,
+        text: userInput,
+      ),
+    );
 
-  void _stopListening() async {
-    await _speechToText.stop();
-    setState(() {
-      final message = Message(
+    _textController.clear();
+    setState(() => _isLoading = true);
+
+    try {
+      final response =
+          await Gemini.instance.prompt(parts: [Part.text(userInput)]);
+      final output = response?.output?.replaceAll('*', '') ?? '';
+
+      final Message aiMessage = _isImageResponse(output)
+          ? Message(
+              type: MessageType.media,
+              sender: MessageSender.bot,
+              text: "Here's an image result.",
+              mediaUrl: output,
+            )
+          : Message(
+              type: MessageType.text,
+              sender: MessageSender.bot,
+              text: output,
+            );
+
+      _addMessage(aiMessage);
+    } catch (error) {
+      _addMessage(
+        const Message(
           type: MessageType.text,
-          sender: MessageSender.human,
-          text: _recognizedText);
-      messages.add(message);
+          sender: MessageSender.bot,
+          text: "Sorry, something went wrong. Please try again.",
+        ),
+      );
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  /// Adds a message to the chat list and updates the UI.
+  void _addMessage(Message message) {
+    setState(() {
+      _chatMessages.add(message);
     });
   }
 
-  void _onSpeechResult(SpeechRecognitionResult result) {
-    setState(() {
-      _recognizedText = result.recognizedWords;
-    });
+  /// Checks if the response contains an image URL.
+  bool _isImageResponse(String output) {
+    return output.contains('http') &&
+        (output.contains('.jpg') ||
+            output.contains('.png') ||
+            output.contains('.jpeg'));
   }
 
   @override
   Widget build(BuildContext context) {
+    final Size mediaQuery = MediaQuery.sizeOf(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Chat with AI Bot"),
+        title: const Text("Chat with Moon"),
         actions: [
           IconButton(
             onPressed: () {},
@@ -73,7 +109,7 @@ class _ChatWithAiPageState extends State<ChatWithAiPage> {
               Expanded(
                 child: ListView.separated(
                   itemBuilder: (context, index) {
-                    final message = messages[index];
+                    final message = _chatMessages[index];
                     return Align(
                       alignment: message.sender == MessageSender.human
                           ? Alignment.centerRight
@@ -83,13 +119,23 @@ class _ChatWithAiPageState extends State<ChatWithAiPage> {
                           : MediaMessage(message: message),
                     );
                   },
-                  itemCount: messages.length,
+                  itemCount: _chatMessages.length,
                   separatorBuilder: (context, index) =>
                       const SizedBox(height: 20),
                 ),
               ),
+              // Loading Animation
+              if (_isLoading)
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Lottie.asset(
+                    'assets/lottie/loading.json',
+                    width: mediaQuery.width * 0.25,
+                  ),
+                ),
               // Text Form Field
               TextFormField(
+                controller: _textController,
                 decoration: InputDecoration(
                   filled: true,
                   prefixIcon: IconButton(
@@ -97,16 +143,8 @@ class _ChatWithAiPageState extends State<ChatWithAiPage> {
                     icon: const Icon(Icons.attachment),
                   ),
                   suffixIcon: IconButton(
-                    onPressed: () {
-                      if (_speechToText.isNotListening) {
-                        _startListening();
-                      } else {
-                        _stopListening();
-                      }
-                    },
-                    icon: _speechToText.isNotListening
-                        ? const Icon(CupertinoIcons.mic)
-                        : const Icon(CupertinoIcons.stop),
+                    onPressed: _sendMessage,
+                    icon: const Icon(Icons.send),
                   ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(14),
