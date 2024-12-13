@@ -1,4 +1,3 @@
-import 'package:ai_assistant/pages/chat_with_ai_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
@@ -6,6 +5,7 @@ import 'package:lottie/lottie.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:share_plus/share_plus.dart';
 
 class SpeakToAiPage extends StatefulWidget {
   const SpeakToAiPage({super.key});
@@ -41,6 +41,7 @@ class _SpeakToAiPageState extends State<SpeakToAiPage> {
     if (!await _speechToText.initialize()) {
       debugPrint("SpeechToText initialization failed.");
     }
+    setState(() {});
   }
 
   /// Configures the FlutterTTS instance.
@@ -67,6 +68,7 @@ class _SpeakToAiPageState extends State<SpeakToAiPage> {
     } else {
       await _initSpeech();
     }
+    setState(() {});
   }
 
   /// Stops listening to the user's voice.
@@ -74,6 +76,7 @@ class _SpeakToAiPageState extends State<SpeakToAiPage> {
     if (_speechToText.isListening) {
       await _speechToText.stop();
     }
+    setState(() {});
   }
 
   /// Handles speech recognition results.
@@ -121,6 +124,12 @@ class _SpeakToAiPageState extends State<SpeakToAiPage> {
     _flutterTts.stop();
   }
 
+  Future<void> _shareResponse(String response) async {
+    if (response.isNotEmpty) {
+      await Share.share(response);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -138,37 +147,41 @@ class _SpeakToAiPageState extends State<SpeakToAiPage> {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
+      body: Column(
         children: [
-          // Image Of A Robot
-          Padding(
-            padding: const EdgeInsets.only(bottom: 30),
-            child: Lottie.asset("assets/lottie/speaking_to_ai_bot.json"),
+          // Non-scrollable Lottie animation
+          Lottie.asset("assets/lottie/speaking_to_ai_bot.json"),
+          // Scrollable content
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                _isLoading
+                    ?
+                    // Loading Animation
+                    Center(
+                        child: Lottie.asset(
+                          'assets/lottie/loading.json',
+                          width: mediaQuery.width * 0.25,
+                          height: mediaQuery.height * 0.25,
+                        ),
+                      )
+                    :
+                    // The Text That Generated From The User
+                    Text(
+                        _responseText.isEmpty
+                            ? _recognizedText.isEmpty
+                                ? "Click on the mic button to generate a voice command."
+                                : _recognizedText
+                            : _responseText,
+                        style: theme.textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+              ],
+            ),
           ),
-          _isLoading
-              ?
-              // Loading Animation
-              Center(
-                  child: Lottie.asset(
-                    'assets/lottie/loading.json',
-                    width: mediaQuery.width * 0.25,
-                    height: mediaQuery.height * 0.25,
-                  ),
-                )
-              :
-              // The Text That Generated From The User
-              Text(
-                  _responseText.isEmpty
-                      ? _recognizedText.isEmpty
-                          ? "Click on the mic button to generate a voice command."
-                          : _recognizedText
-                      : _responseText,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
         ],
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -181,15 +194,9 @@ class _SpeakToAiPageState extends State<SpeakToAiPage> {
               style: IconButton.styleFrom(
                 backgroundColor: theme.colorScheme.secondary,
               ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const ChatWithAiPage()),
-                );
-              },
+              onPressed: _resetText,
               icon: Icon(
-                Icons.keyboard,
+                Icons.delete,
                 size: 30,
                 color: theme.colorScheme.onSecondary,
               ),
@@ -208,9 +215,9 @@ class _SpeakToAiPageState extends State<SpeakToAiPage> {
                 }
               },
               icon: Icon(
-                _speechToText.isNotListening
-                    ? CupertinoIcons.mic
-                    : CupertinoIcons.stop,
+                _speechToText.isListening
+                    ? CupertinoIcons.stop
+                    : CupertinoIcons.mic,
                 size: 60,
                 color: theme.colorScheme.onPrimary,
               ),
@@ -219,9 +226,11 @@ class _SpeakToAiPageState extends State<SpeakToAiPage> {
               style: IconButton.styleFrom(
                 backgroundColor: theme.colorScheme.secondary,
               ),
-              onPressed: _resetText,
+              onPressed: () async {
+                await _shareResponse(_responseText);
+              },
               icon: Icon(
-                Icons.delete,
+                Icons.share,
                 size: 30,
                 color: theme.colorScheme.onSecondary,
               ),

@@ -48,30 +48,31 @@ class MediaMessage extends StatelessWidget {
             ),
           ),
 
-          // Icons For Actions
-          Row(
-            children: [
-              IconButton.outlined(
-                onPressed: () {},
-                icon: const Icon(Icons.thumb_up),
-              ),
-              const SizedBox(width: 10),
-              IconButton.outlined(
-                onPressed: () {},
-                icon: const Icon(Icons.thumb_down),
-              ),
-              const Spacer(),
-              IconButton.outlined(
-                onPressed: () {},
-                icon: const Icon(Icons.copy),
-              ),
-              const SizedBox(width: 10),
-              IconButton.outlined(
-                onPressed: () {},
-                icon: const Icon(Icons.share),
-              ),
-            ],
-          ),
+          if (message.sender == MessageSender.bot)
+            // Icons For Actions
+            Row(
+              children: [
+                IconButton.outlined(
+                  onPressed: () {},
+                  icon: const Icon(Icons.thumb_up),
+                ),
+                const SizedBox(width: 10),
+                IconButton.outlined(
+                  onPressed: () {},
+                  icon: const Icon(Icons.thumb_down),
+                ),
+                const Spacer(),
+                IconButton.outlined(
+                  onPressed: () {},
+                  icon: const Icon(Icons.copy),
+                ),
+                const SizedBox(width: 10),
+                IconButton.outlined(
+                  onPressed: () {},
+                  icon: const Icon(Icons.share),
+                ),
+              ],
+            ),
         ],
       ),
     );

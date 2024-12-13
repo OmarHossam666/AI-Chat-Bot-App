@@ -13,7 +13,7 @@
         </intent>
     </queries>
     <application
-        android:label="AI ChatBot"
+        android:label="MoonTalk"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
