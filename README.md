@@ -18,17 +18,20 @@ MoonTalk is a Flutter application that allows users to interact with an AI assis
 ## Installation
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/OmarHossam666/MoonTalkApp.git
-   cd moontalk
+   cd MoonTalkApp
    ```
 
 2. **Install dependencies:**
+
    ```bash
    flutter pub get
    ```
 
 3. **Run the app:**
+
    ```bash
    flutter run
    ```
