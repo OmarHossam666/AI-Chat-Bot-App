@@ -135,6 +135,7 @@ class _ChatWithAiPageState extends State<ChatWithAiPage> {
                 ),
               // Text Form Field
               TextFormField(
+                autofocus: true,
                 controller: _textController,
                 decoration: InputDecoration(
                   filled: true,
